@@ -1,6 +1,6 @@
 package co.nz.solnet.demo.kafka;
 
-import co.nz.solnet.demo.kafka.consumer.CapitalizeConsumer;
+import co.nz.solnet.demo.kafka.consumer.AutoCommitOffsetConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +16,15 @@ public class ConsumerNormalApplication implements CommandLineRunner {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private CapitalizeConsumer capitalizeConsumer;
+    private AutoCommitOffsetConsumer autoCommitOffsetConsumer;
 
     public static void main(String[] args) {
         SpringApplication.run(ConsumerNormalApplication.class, args);
+    }
+
+
+    private void consumerPoll() {
+        autoCommitOffsetConsumer.poll();
     }
 
     @Override
@@ -34,23 +39,9 @@ public class ConsumerNormalApplication implements CommandLineRunner {
             }
         });
 
-        final int giveUp = 100;   int noRecordsCount = 0;
         try {
-            while (true) {
-                final ConsumerRecords<String, String> consumerRecords = capitalizeConsumer.getConsumer().poll(1000);
+            consumerPoll();
 
-                if (consumerRecords.count() == 0) {
-                    noRecordsCount++;
-                    if (noRecordsCount > giveUp) break;
-                    else continue;
-                }
-
-                consumerRecords.forEach(record -> {
-                    System.out.printf("Consumer Record:(%s, %s, %d, %d)\n", record.key(), record.value(), record.partition(), record.offset());
-                });
-
-//                capitalizeConsumer.getConsumer().commitAsync();
-            }
             latch.await();
         } catch (Throwable e) {
             logger.error("Error", e);
