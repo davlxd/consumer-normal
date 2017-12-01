@@ -1,6 +1,7 @@
 package co.nz.solnet.demo.kafka;
 
 import co.nz.solnet.demo.kafka.consumer.AutoCommitOffsetConsumer;
+import co.nz.solnet.demo.kafka.consumer.ManualCommitOffsetConsumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +19,19 @@ public class ConsumerNormalApplication implements CommandLineRunner {
     @Autowired
     private AutoCommitOffsetConsumer autoCommitOffsetConsumer;
 
+    @Autowired
+    private ManualCommitOffsetConsumer manualCommitOffsetConsumer;
+
     public static void main(String[] args) {
         SpringApplication.run(ConsumerNormalApplication.class, args);
     }
 
 
     private void consumerPoll() {
-        autoCommitOffsetConsumer.poll();
-        autoCommitOffsetConsumer.unSubscribeAndClose();
+//        autoCommitOffsetConsumer.poll();
+//        autoCommitOffsetConsumer.unSubscribeAndClose();
+        manualCommitOffsetConsumer.poll();
+        manualCommitOffsetConsumer.unSubscribeAndClose();
     }
 
     @Override
