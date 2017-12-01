@@ -38,7 +38,7 @@ public class AutoCommitOffsetConsumer {
     }
 
     public void pollOld() {
-        final int giveUp = 100;
+        final int giveUp = 10;
         int noRecordsCount = 0;
 
         while (true) {
@@ -46,14 +46,22 @@ public class AutoCommitOffsetConsumer {
 
             if (consumerRecords.count() == 0) {
                 noRecordsCount++;
-                if (noRecordsCount > giveUp) break;
-                else continue;
+                if (noRecordsCount > giveUp) {
+                    logger.info("consumerRecords.count() == 0 too much, give up");
+                    break;
+                } else {
+                    continue;
+                }
             }
 
             consumerRecords.forEach(record -> {
                 System.out.printf("Consumer Record:(%s, %s, %d, %d)\n", record.key(), record.value(), record.partition(), record.offset());
             });
         }
+
+        consumer.unsubscribe();
+        consumer.close();
+        logger.info("KafkaStreams closed");
     }
 
     private void pollNew() {
@@ -62,14 +70,15 @@ public class AutoCommitOffsetConsumer {
             for (ConsumerRecord<String, String> record : records)
                 System.out.printf("Consumer Record:(%s, %s, %d, %d)\n", record.key(), record.value(), record.partition(), record.offset());
         }
+
     }
 
     public void poll() {
-        pollNew();
+        pollOld();
     }
 
     @PreDestroy
-    private void kafkaProducerClose() {
+    public void unSubscribeAndClose() {
         consumer.unsubscribe();
         consumer.close();
         logger.info("KafkaStreams closed");

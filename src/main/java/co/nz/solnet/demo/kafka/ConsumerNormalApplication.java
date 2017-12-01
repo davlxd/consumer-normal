@@ -25,6 +25,7 @@ public class ConsumerNormalApplication implements CommandLineRunner {
 
     private void consumerPoll() {
         autoCommitOffsetConsumer.poll();
+        autoCommitOffsetConsumer.unSubscribeAndClose();
     }
 
     @Override
